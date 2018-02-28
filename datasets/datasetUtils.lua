@@ -36,11 +36,11 @@ function dataset_utils.partitionDataset(nTotalPersons,testTrainSplit)
     print('N test  = ' .. testInds:size(1))
 
     -- save the split to a file for later use
-    -- datasetSplit = {
-    --     trainInds = trainInds,
-    --     testInds = testInds,
-    -- }
-    -- torch.save('./trainedNets/dataSplit_PRID2011.th7',datasetSplit)
+    datasetSplit = {
+        trainInds = trainInds,
+        testInds = testInds,
+    }
+    torch.save('./data/dataSplit.th7',datasetSplit)
 
     return trainInds,testInds
 end

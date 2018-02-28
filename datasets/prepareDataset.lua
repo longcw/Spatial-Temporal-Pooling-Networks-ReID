@@ -55,14 +55,14 @@ local function loadSequenceImages(cameraDir,opticalflowDir,filesList)
         img = image.rgb2yuv(img):type('torch.DoubleTensor')
 
         for c = 1,3 do
-            local v = torch.sqrt(torch.var(img[c]))
+            local v = torch.var(img[c])
             local m = torch.mean(img[c])
             img[c] = img[c] - m
             img[c] = img[c] / torch.sqrt(v)
             imagePixelData[{ {i}, {c}, {}, {}}] = img[c]
         end 
         for c = 1,2 do
-            local v = torch.sqrt(torch.var(imgof[c]))
+            local v = torch.var(imgof[c])
             local m = torch.mean(imgof[c])
             imgof[c] = imgof[c] - m
             imgof[c] = imgof[c] / torch.sqrt(v)

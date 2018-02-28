@@ -165,6 +165,13 @@ function trainSequence(model,Combined_CNN_RNN,baseCNN,criterion,personImages,sam
         end
 
         if (eph % opt.samplingEpochs == 0) then
+            -- save the Model and Convnet (which is part of the model) to a file
+            saveFileNameModel = './weights/fullModel_' .. opt.saveFileName .. '.dat'
+            torch.save(saveFileNameModel,model)
+            saveFileNameConvnet = './weights/convNet_' .. opt.saveFileName .. '.dat'
+            torch.save(saveFileNameConvnet,Combined_CNN_RNN)
+            saveFileNameBasenet = './weights/baseNet_' .. opt.saveFileName .. '.dat'
+            torch.save(saveFileNameBasenet,baseCNN)
 
             model:evaluate()
             Combined_CNN_RNN:evaluate()

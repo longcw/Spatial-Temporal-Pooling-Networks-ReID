@@ -21,7 +21,7 @@
 %read an image sequence in the ilids video / PRID dataset
 %compute optical flow
 
-rootDir = fullfile('D:','person_re-id','data');
+rootDir = fullfile('.');
 
 for person = 1:319
     disp(person)
@@ -48,11 +48,17 @@ for person = 1:319
                 end
             end
 
-            optical = vision.OpticalFlow('Method','Lucas-Kanade','OutputValue', 'Horizontal and vertical components in complex form');
-
+            % optical = vision.OpticalFlow('Method','Lucas-Kanade','OutputValue', 'Horizontal and vertical components in complex form');
+            optical = opticalFlowLK;
             for f = 1:length(seqFiles)
                 seqImg = imread(fullfile(dataDir,seqFiles{f}));
-                optFlow = step(optical,double(rgb2gray(seqImg)));
+                % optFlow = step(optical.estimateFlow,double(rgb2gray(seqImg)));
+                optFlowObj = estimateFlow(optical, rgb2gray(seqImg));
+                optFlow = optFlowObj.Vx + 1i * optFlowObj.Vy;
+                
+                % figure(1); imshow(seqImg);
+                % figure(2); optFlowObj.plot();
+                % set(gca,'Ydir','reverse')
                 
                 %separate optFlow into mag and phase components
                 R = abs(optFlow);
@@ -66,9 +72,9 @@ for person = 1:319
                 %convert back to complex form
                 Z = R.*exp(1i*theta);                
 
-                H = imag(optFlow);
-                V = real(optFlow);
-                M = abs(optFlow);
+                H = imag(optFlow) * 127;
+                V = real(optFlow) * 127;
+                M = abs(optFlow) * 127;
                 
                 H = H + 127;
                 V = V + 127;

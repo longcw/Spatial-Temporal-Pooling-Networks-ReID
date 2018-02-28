@@ -54,7 +54,7 @@ cmd:option('-dirOF','','dir path to the sequences of optical flow')
 cmd:option('-sampleSeqLength',16,'length of sequence to train network')
 cmd:option('-gradClip',5,'magnitude of clip on the RNN gradient')
 cmd:option('-saveFileName','basicnet','name to save dataset file')
-cmd:option('-usePredefinedSplit',false,'Use predefined test/training split loaded from a file')
+cmd:option('-usePredefinedSplit',true,'Use predefined test/training split loaded from a file')
 cmd:option('-dropoutFrac',0.6,'fraction of dropout to use between layers')
 cmd:option('-dropoutFracRNN',0.6,'fraction of dropout to use between RNN layers')
 cmd:option('-samplingEpochs',100,'how often to compute the CMC curve - dont compute too much - its slow!')
@@ -126,11 +126,9 @@ if opt.seqRootRGB and opt.seqRootOF then
 end
 
 
-print('loading Dataset - ',seqRootRGB,seqRootOF)
-dataset = prepDataset.prepareDataset(seqRootRGB,seqRootOF,filePrefix)
-print('dataset loaded',#dataset,seqRootRGB,seqRootOF)
-
 if opt.usePredefinedSplit then
+    dataset = nil
+
     -- useful for debugging to run with exactly the same test/train split
     print('loading predefined test/training split')
     local datasetSplit
@@ -142,12 +140,24 @@ if opt.usePredefinedSplit then
     testInds = datasetSplit.testInds
     trainInds = datasetSplit.trainInds
 else
+    print('loading Dataset - ',seqRootRGB,seqRootOF)
+    dataset = prepDataset.prepareDataset(seqRootRGB,seqRootOF,filePrefix)
+    print('dataset loaded',#dataset,seqRootRGB,seqRootOF)
+
     print('randomizing test/training split')
     trainInds,testInds = datasetUtils.partitionDataset(#dataset,0.5)
 end
 
 -- build the model
+print('building Model')
 fullModel,criterion,Combined_CNN_RNN,baseCNN = buildModel_MeanPool_RNN(opt,16,opt.nConvFilters,opt.nConvFilters,trainInds:size(1))
+
+if dataset == nil then
+    print('loading Dataset - ',seqRootRGB,seqRootOF)
+    dataset = prepDataset.prepareDataset(seqRootRGB,seqRootOF,filePrefix)
+    print('dataset loaded',#dataset,seqRootRGB,seqRootOF)
+end
+
 
 -- train the model
 trainedModel,trainedConvnet,trainedBaseNet = trainSequence(fullModel,Combined_CNN_RNN,baseCNN,criterion,dataset,nSamplesPerPerson,trainInds,testInds,nEpochs)
